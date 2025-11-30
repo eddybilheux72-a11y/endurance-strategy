@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>🏁 Endurance Strategy Hub | Pro Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    /* 1. NOUVEAU DESIGN PROFESSIONNEL */
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #0d0d0d; /* Noir très foncé */
+        color: #e0e0e0; /* Gris clair pour le texte */
+        /* Fond discret de course (motif carbone ou grille) */
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%231a1a1a" width="100" height="100"/><rect x="0" y="0" width="10" height="10" fill="%23333"/><rect x="25" y="25" width="10" height="10" fill="%23333"/><rect x="50" y="50" width="10" height="10" fill="%23333"/><rect x="75" y="75" width="10" height="10" fill="%23333"/></svg>');
+        background-size: 15px 15px; /* Motif subtil */
+    }
+    h1, h2 { color: #ff5722; /* Rouge Course */ text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid #ff5722; padding-bottom: 5px; margin-top: 20px; }
+    .container { padding: 20px; max-width: 1400px; margin: auto; }
+    .hidden { display: none; }
+
+    /* Inputs et textarea */
+    input, textarea, select {
+        width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px;
+        background: #1e1e1e; border: 1px solid #333; color: #f0f0f0;
+        border-radius: 6px; font-size: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        transition: border-color 0.3s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #ff5722; outline: none; }
+    label { font-weight: bold; margin-top: 10px; display: block; color: #aaa; }
+
+    /* Boutons */
+    .btn {
+        background: #ff5722; padding: 12px 25px; border: none; cursor: pointer; color: white;
+        font-weight: bold; border-radius: 6px; margin-top: 10px; transition: background-color 0.3s, transform 0.1s;
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn:hover { background: #ff7847; }
+    .btn:active { transform: scale(0.98); }
+
+    /* Sections */
+    .section {
+        background: #1a1a1a; padding: 25px; margin-top: 25px; border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-left: 5px solid #ff5722;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* Résultat calculs */
+    .result { background: #222; padding: 20px; margin-top: 15px; border-radius: 8px; color: #4CAF50; /* Vert Succès */ font-weight: bold; border: 1px dashed #4CAF50; }
+    .result p { margin: 5px 0; }
+    .result h3 { color: #fff; margin-top: 0; }
+
+    /* Planning dynamique */
+    #planningRelais p { background: #222; padding: 10px; border-radius: 5px; margin: 8px 0; border-left: 3px solid #ff9f1c; }
+
+    /* Responsive */
+    @media(max-width: 1000px) { .grid, .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="container">
+    <h1>🔐 Accès Paddock Privé</h1>
+    <p>Entrez le code d'accès de l'équipe pour visualiser la stratégie de course :</p>
+    <input type="password" id="password" placeholder="Mot de passe du Paddock">
+    <button class="btn" onclick="checkPassword()">Accéder au Paddock</button>
+</div>
+
+<div id="main-content" class="hidden">
+<div class="container">
+    <h1>🏁 ENDURANCE STRATEGY HUB</h1>
+    <p>Tableau de bord de gestion des courses longues : calculs de carburant, pneus et planning de relais.</p>
+
+    <div class="section">
+        <h2>🏎️ Calculateur de Stint</h2>
+        <div class="grid-2">
+            <div>
+                <label>Temps en piste restant (minutes)</label>
+                <input type="number" id="tempsPiste" placeholder="Ex: 360 (6 heures)">
+            </div>
+            <div>
+                <label>Heure actuelle de début de calcul (HH:MM)</label>
+                <input type="time" id="heureDebut" value="08:00">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <label>Durée moyenne d'un tour (minutes)</label>
+                <input type="number" id="dureeTour" placeholder="Ex: 2.0">
+            </div>
+            <div>
+                <label>Durée maximale d'un relais pilote (minutes)</label>
+                <input type="number" id="maxDureeRelais" placeholder="Ex: 65 (selon règlement)">
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div>
+                <label>Consommation par tour (litres)</label>
+                <input type="number" id="consoTour" placeholder="Ex: 2.5">
+            </div>
+            <div>
+                <label>Capacité du réservoir (litres)</label>
+                <input type="number" id="reservoir" placeholder="Ex: 50">
+            </div>
+        </div>
+
+        <label>Temps moyen au stand (minutes) ⏱️</label>
+        <input type="number" id="tempsStand" placeholder="Ex: 1.5 (inclut ravitaillement et changement pilote)">
+        
+        <button class="btn" onclick="calculer()">Calculer Stint & Pneus</button>
+        <div class="result" id="resultat"></div>
+    </div>
+
+    <div class="grid">
+        <div class="section">
+            <h2>🛞 Stock & Usure Pneus</h2>
+            <label>Stock total de pneus disponibles (jeux complets)</label>
+            <input type="number" id="stockPneus" placeholder="Ex: 15 (4 pneus = 1 jeu)">
+
+            <label>Type de pneus pour le prochain stint</label>
+            <select id="pneus">
+                <option value="Slicks Neufs">Slicks Neufs</option>
+                <option value="Slicks Usés">Slicks Usés (Réutilisation)</option>
+                <option value="Pluie">Pluie</option>
+                <option value="Intermédiaires">Intermédiaires</option>
+            </select>
+            <div class="result" id="resultatPneus"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🧑‍🤝‍🧑 Équipe Pilotes</h2>
+            <label>Pilote 1 (Relais 1)</label><input type="text" id="pilote1" value="Marc Dupont">
+            <label>Pilote 2</label><input type="text" id="pilote2" value="Sophie Lefort">
+            <label>Pilote 3</label><input type="text" id="pilote3" value="Alex Rive">
+        </div>
+        
+        <div class="section">
+            <h2>📅 Planning Pilotes & Relais</h2>
+             <p>Le planning est calculé automatiquement après le "Calculer Stint".</p>
+             <div id="planningRelais">
+                </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Notes Stratégiques</h2>
+        <div class="grid-2">
+            <div>
+                <h3>Consommation & Carburant</h3>
+                <textarea id="consoInfo" rows="4" placeholder="Suivi précis du carburant par stint, réglages d'économie..."></textarea>
+            </div>
+            <div>
+                <h3>Météo & Piste</h3>
+                <textarea id="meteo" rows="4" placeholder="Conditions météo, température, évolution de la piste..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⏱️ Chronos & Performances</h2>
+        <textarea id="chronos" rows="4" placeholder="Temps au tour cibles, meilleur chrono réalisé, écarts..."></textarea>
+    </div>
+
+</div>
+</div>
+
+<script>
+// Mot de passe
+const PASS = "lemans2025";
+function checkPassword() {
+    const input = document.getElementById("password").value;
+    if(input === PASS){
+        document.getElementById("login-screen").style.display="none";
+        document.getElementById("main-content").classList.remove("hidden");
+    } else {
+        alert("Code d'accès incorrect. Veuillez vérifier la clé Paddock.");
+    }
+}
+
+// Fonction de calcul de date/heure
+function addMinutes(date, minutes) {
+    const newDate = new Date(date.getTime() + minutes * 60000);
+    // Formatte l'heure en HH:MM
+    const h = ('0' + newDate.getHours()).slice(-2);
+    const m = ('0' + newDate.getMinutes()).slice(-2);
+    return `${h}:${m}`;
+}
+
+// Calculateur tours & carburant & Planning
+function calculer() {
+    // 1. Récupération des valeurs
+    const tempsTotal = parseFloat(document.getElementById('tempsPiste').value);
+    const dureeTour = parseFloat(document.getElementById('dureeTour').value);
+    const consoTour = parseFloat(document.getElementById('consoTour').value);
+    const reservoir = parseFloat(document.getElementById('reservoir').value);
+    const maxDureeRelais = parseFloat(document.getElementById('maxDureeRelais').value); 
+    const tempsStand = parseFloat(document.getElementById('tempsStand').value); // NOUVEAU
+    const stockPneus = parseInt(document.getElementById('stockPneus').value); // NOUVEAU
+    const typePneu = document.getElementById('pneus').value; // NOUVEAU
+    const heureDebutStr = document.getElementById('heureDebut').value; // NOUVEAU
+
+    if(!tempsTotal || !dureeTour || !consoTour || !reservoir || !maxDureeRelais || !tempsStand || isNaN(stockPneus)){
+        document.getElementById('resultat').innerHTML = "🛑 Merci de remplir tous les champs du Calculateur.";
+        return;
+    }
+
+    // --- CALCUL DE LA DURÉE DU STINT LIMITANT ---
+    // Calcul basé sur le carburant
+    const toursCarburant = Math.floor(reservoir / consoTour);
+    const dureeRelaisCarburant = toursCarburant * dureeTour;
+    
+    // Détermination de la durée réelle du relais (le minimum entre Carburant et Pilote)
+    const dureeRelaisLimite = Math.min(dureeRelaisCarburant, maxDureeRelais);
+    const toursParRelais = Math.floor(dureeRelaisLimite / dureeTour);
+    
+    // Durée totale du STINT (relais de conduite)
+    const dureeStint = toursParRelais * dureeTour; 
+    
+    // --- CALCULS GLOBAUX ---
+    const toursPossiblesTotal = Math.floor(tempsTotal / dureeTour);
+    const nbRelaisTotal = Math.ceil(tempsTotal / dureeStint);
+    
+    // --- AFFICHAGE DES RÉSULTATS ---
+    let resultHTML = `<h3>📈 Synthèse du Prochain Stint :</h3>`;
+    resultHTML += `<p>Durée Max. Carburant : **${toursCarburant} tours** (${dureeRelaisCarburant.toFixed(1)} min)</p>`;
+    resultHTML += `<p>Durée Max. Pilote : **${maxDureeRelais.toFixed(1)} min**</p>`;
+    resultHTML += `<hr style="border-top: 1px solid #444;">`;
+    resultHTML += `<p>Tours **par Relais** : **${toursParRelais} tours**</p>`;
+    resultHTML += `<p>Durée du Stint (conduite) : **${dureeStint.toFixed(1)} minutes**</p>`;
+    resultHTML += `<p>Arrêts aux stands nécessaires : **${nbRelaisTotal}** (pour ${tempsTotal} min de course)</p>`;
+    resultHTML += `<p>Carburant à ajouter : **${(toursParRelais * consoTour).toFixed(1)} litres**</p>`;
+
+    document.getElementById('resultat').innerHTML = resultHTML;
+    
+    // --- 2. GESTION DES PNEUS ---
+    let pneusRestants = stockPneus;
+    let resultatPneusHTML = "";
+
+    // Si on change de pneus à chaque relais
+    if (typePneu === "Slicks Neufs" || typePneu === "Pluie" || typePneu === "Intermédiaires") {
+        pneusRestants -= 1; // Un jeu utilisé
+        resultatPneusHTML += `<h3>🛞 Stratégie Pneus :</h3>`;
+        resultatPneusHTML += `<p>Pneus utilisés (prochain arrêt) : **1 jeu** (${typePneu})</p>`;
+        resultatPneusHTML += `<p>Stock de pneus restant : **${pneusRestants} jeux**</p>`;
+    } else {
+        // Pneus réutilisés ou Double Stint
+        resultatPneusHTML += `<h3>🛞 Stratégie Pneus :</h3>`;
+        resultatPneusHTML += `<p>Pneus utilisés (prochain arrêt) : **0 jeu** (Double Stint / Réutilisation)</p>`;
+        resultatPneusHTML += `<p>Stock de pneus restant : **${pneusRestants} jeux**</p>`;
+    }
+    document.getElementById('resultatPneus').innerHTML = resultatPneusHTML;
+    
+    // --- 3. PLANNING DES RELAIS DYNAMIQUE ---
+    const pilotes = [
+        document.getElementById('pilote1').value,
+        document.getElementById('pilote2').value,
+        document.getElementById('pilote3').value,
+        // Ajoutez d'autres pilotes si vous voulez, mais gardons 3 pour l'exemple
+    ];
+    
+    let planningHTML = `<h3>Planning Calculé :</h3>`;
+    let tempsRestant = tempsTotal;
+    let heureActuelle = new Date();
+    
+    // Configure l'heure de début
+    const [h, m] = heureDebutStr.split(':').map(Number);
+    heureActuelle.setHours(h);
+    heureActuelle.setMinutes(m);
+    heureActuelle.setSeconds(0);
+    heureActuelle.setMilliseconds(0);
+    
+    let indexPilote = 0;
+    let numStint = 1;
+
+    while (tempsRestant > 0 && numStint <= nbRelaisTotal) {
+        const pilote = pilotes[indexPilote % pilotes.length];
+        
+        // Calcul des heures
+        const heureDebutStint = addMinutes(heureActuelle, 0);
+        const heureFinStintDate = new Date(heureActuelle.getTime());
+        const heureFinStint = addMinutes(heureFinStintDate, dureeStint);
+        
+        // Avancer l'heure pour le prochain tour
+        heureActuelle = new Date(heureFinStintDate.getTime() + dureeStint * 60000);
+        
+        // Affichage du relais
+        planningHTML += `<p><b>Stint #${numStint} (${pilote})</b> :`;
+        planningHTML += `<br>Départ : **${heureDebutStint}** / Fin (en piste) : **${heureFinStint}**</p>`;
+        
+        // Si ce n'est pas le dernier relais, ajouter le temps de stand
+        if (tempsRestant - dureeStint > 0) {
+            const heureFinStand = addMinutes(heureActuelle, tempsStand);
+            planningHTML += `<p style="color: #ff9f1c; margin-left: 10px;">Arrêt Stand (Fin) : ${heureFinStand}</p>`;
+            heureActuelle = new Date(heureActuelle.getTime() + tempsStand * 60000); // Avancer l'heure du stand
+        }
+        
+        tempsRestant -= dureeStint;
+        indexPilote++;
+        numStint++;
+    }
+    
+    document.getElementById('planningRelais').innerHTML = planningHTML;
+}
+</script>
+
+</body>
+</html>
